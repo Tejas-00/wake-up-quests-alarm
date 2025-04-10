@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAlarms, Alarm, MissionType } from "../context/AlarmContext";
 import { Switch } from "@/components/ui/switch";
@@ -162,6 +163,10 @@ const AlarmListItem: React.FC<{ alarm: Alarm }> = ({ alarm }) => {
 const AlarmList: React.FC = () => {
   const { alarms } = useAlarms();
   const nextAlarm = getNextAlarmTime(alarms);
+  
+  // Add these two lines to define the missing variables
+  const enabledAlarms = alarms.filter(alarm => alarm.enabled);
+  const disabledAlarms = alarms.filter(alarm => !alarm.enabled);
   
   if (alarms.length === 0) {
     return (
