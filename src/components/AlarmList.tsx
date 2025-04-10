@@ -1,8 +1,8 @@
-
 import React from "react";
 import { useAlarms, Alarm, MissionType } from "../context/AlarmContext";
 import { Switch } from "@/components/ui/switch";
 import { Bell, Clock, Camera, Calculator, Puzzle } from "lucide-react";
+import { shouldTriggerAlarm } from "../utils/alarmTrigger";
 
 const getMissionIcon = (type: MissionType) => {
   switch (type) {
@@ -66,6 +66,66 @@ const getDayLabels = (days: Alarm["days"]) => {
   return dayLabels.join(", ");
 };
 
+const getNextAlarmTime = (alarms: Alarm[]): { alarm: Alarm; timeUntil: string } | null => {
+  if (!alarms || alarms.length === 0) return null;
+  
+  const enabledAlarms = alarms.filter(a => a.enabled);
+  if (enabledAlarms.length === 0) return null;
+  
+  const now = new Date();
+  let closestAlarm: Alarm | null = null;
+  let closestTime: Date | null = null;
+  
+  for (const alarm of enabledAlarms) {
+    const [hours, minutes] = alarm.time.split(':').map(Number);
+    
+    // Check each day of the week
+    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+      const checkDate = new Date();
+      checkDate.setDate(now.getDate() + dayOffset);
+      
+      const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayName = daysOfWeek[checkDate.getDay()];
+      
+      // Skip if alarm is not set for this day
+      if (!alarm.days[dayName as keyof typeof alarm.days]) continue;
+      
+      // Set the time for comparison
+      checkDate.setHours(hours, minutes, 0, 0);
+      
+      // Skip if this time is in the past
+      if (dayOffset === 0 && checkDate <= now) continue;
+      
+      // If this is the closest alarm so far, save it
+      if (!closestTime || checkDate < closestTime) {
+        closestTime = checkDate;
+        closestAlarm = alarm;
+      }
+      
+      // We only need to check the first valid day for each alarm
+      break;
+    }
+  }
+  
+  if (closestAlarm && closestTime) {
+    // Calculate time until the alarm
+    const diffMs = closestTime.getTime() - now.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    // Format the time until
+    let timeUntil = "";
+    if (diffHours > 0) {
+      timeUntil += `${diffHours}h `;
+    }
+    timeUntil += `${diffMinutes}m`;
+    
+    return { alarm: closestAlarm, timeUntil };
+  }
+  
+  return null;
+};
+
 const AlarmListItem: React.FC<{ alarm: Alarm }> = ({ alarm }) => {
   const { toggleAlarm } = useAlarms();
   
@@ -101,6 +161,7 @@ const AlarmListItem: React.FC<{ alarm: Alarm }> = ({ alarm }) => {
 
 const AlarmList: React.FC = () => {
   const { alarms } = useAlarms();
+  const nextAlarm = getNextAlarmTime(alarms);
   
   if (alarms.length === 0) {
     return (
@@ -114,11 +175,17 @@ const AlarmList: React.FC = () => {
     );
   }
   
-  const enabledAlarms = alarms.filter(alarm => alarm.enabled);
-  const disabledAlarms = alarms.filter(alarm => !alarm.enabled);
-  
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 p-4">
+      {nextAlarm && (
+        <div className="bg-primary/10 p-3 rounded-lg mb-4">
+          <p className="text-sm">
+            <span className="font-semibold">Next alarm:</span> {nextAlarm.alarm.time} 
+            <span className="text-muted-foreground ml-2">({nextAlarm.timeUntil} from now)</span>
+          </p>
+        </div>
+      )}
+    
       {enabledAlarms.length > 0 && (
         <div className="space-y-3">
           {enabledAlarms.map(alarm => (

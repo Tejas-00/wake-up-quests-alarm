@@ -1,6 +1,6 @@
-
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { getAlarms, saveAlarm, deleteAlarm } from "../utils/alarmStorage";
+import { startAlarmMonitoring, dismissAlarm, getActiveAlarmId } from "../utils/alarmTrigger";
 
 export type MissionType = "photo" | "math" | "puzzle";
 
@@ -36,6 +36,7 @@ export interface AlarmStat {
 interface AlarmContextType {
   alarms: Alarm[];
   stats: AlarmStat[];
+  activeAlarmId: string | null;
   createAlarm: (alarm: Omit<Alarm, "id">) => void;
   updateAlarm: (id: string, alarm: Partial<Alarm>) => void;
   removeAlarm: (id: string) => void;
@@ -44,6 +45,7 @@ interface AlarmContextType {
   getAverageWakeUpTime: () => string | null;
   getAverageSnoozeCount: () => number;
   getSuccessRate: () => number;
+  dismissCurrentAlarm: () => void;
 }
 
 const AlarmContext = createContext<AlarmContextType | undefined>(undefined);
@@ -59,18 +61,45 @@ export const useAlarms = () => {
 export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const [stats, setStats] = useState<AlarmStat[]>([]);
+  const [activeAlarmId, setActiveAlarmId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load alarms from storage
     const loadedAlarms = getAlarms();
     setAlarms(loadedAlarms);
 
-    // Load stats from storage
     const loadedStats = localStorage.getItem("alarm_stats");
     if (loadedStats) {
       setStats(JSON.parse(loadedStats));
     }
+
+    startAlarmMonitoring({
+      onAlarmTriggered: (alarm) => {
+        console.log("Alarm triggered:", alarm);
+        setActiveAlarmId(alarm.id);
+      }
+    });
+
+    return () => {
+      dismissAlarm();
+    };
   }, []);
+
+  useEffect(() => {
+    const checkActiveAlarm = () => {
+      const currentActiveId = getActiveAlarmId();
+      if (currentActiveId !== activeAlarmId) {
+        setActiveAlarmId(currentActiveId);
+      }
+    };
+
+    const intervalId = setInterval(checkActiveAlarm, 1000);
+    return () => clearInterval(intervalId);
+  }, [activeAlarmId]);
+
+  const dismissCurrentAlarm = () => {
+    dismissAlarm();
+    setActiveAlarmId(null);
+  };
 
   const createAlarm = (alarm: Omit<Alarm, "id">) => {
     const newAlarm: Alarm = {
@@ -155,6 +184,7 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const value: AlarmContextType = {
     alarms,
     stats,
+    activeAlarmId,
     createAlarm,
     updateAlarm,
     removeAlarm,
@@ -162,7 +192,8 @@ export const AlarmProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addStat,
     getAverageWakeUpTime,
     getAverageSnoozeCount,
-    getSuccessRate
+    getSuccessRate,
+    dismissCurrentAlarm
   };
 
   return <AlarmContext.Provider value={value}>{children}</AlarmContext.Provider>;
