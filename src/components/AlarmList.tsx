@@ -1,9 +1,10 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useAlarms, Alarm, MissionType } from "../context/AlarmContext";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Clock, Camera, Calculator, Puzzle } from "lucide-react";
+import { Bell, Clock, Camera, Calculator, Puzzle, Edit2 } from "lucide-react";
 import { shouldTriggerAlarm } from "../utils/alarmTrigger";
+import AlarmForm from "./AlarmForm";
+import { Button } from "@/components/ui/button";
 
 const getMissionIcon = (type: MissionType) => {
   switch (type) {
@@ -127,20 +128,23 @@ const getNextAlarmTime = (alarms: Alarm[]): { alarm: Alarm; timeUntil: string } 
   return null;
 };
 
-const AlarmListItem: React.FC<{ alarm: Alarm }> = ({ alarm }) => {
+const AlarmListItem: React.FC<{ 
+  alarm: Alarm, 
+  onEdit: (alarm: Alarm) => void 
+}> = ({ alarm, onEdit }) => {
   const { toggleAlarm } = useAlarms();
   
   return (
-    <div className="alarm-item">
+    <div className="alarm-item bg-card rounded-lg p-4 shadow-sm">
       <div className="flex justify-between items-center">
         <div>
-          <p className="alarm-time">{alarm.time}</p>
+          <p className="alarm-time text-xl font-semibold">{alarm.time}</p>
           <div className="flex items-center gap-2 mt-1">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">{getDayLabels(alarm.days)}</span>
           </div>
           <div className="flex items-center gap-2 mt-2">
-            <div className={`mission-badge ${getMissionColor(alarm.missionType)} flex items-center gap-1`}>
+            <div className={`mission-badge ${getMissionColor(alarm.missionType)} px-2 py-1 rounded-full text-xs flex items-center gap-1`}>
               {getMissionIcon(alarm.missionType)}
               <span>{getMissionLabel(alarm.missionType)}</span>
             </div>
@@ -149,11 +153,19 @@ const AlarmListItem: React.FC<{ alarm: Alarm }> = ({ alarm }) => {
             <p className="text-sm mt-2 text-muted-foreground">{alarm.label}</p>
           )}
         </div>
-        <div>
+        <div className="flex flex-col items-end gap-2">
           <Switch 
             checked={alarm.enabled}
             onCheckedChange={() => toggleAlarm(alarm.id)}
           />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="p-0 h-8 w-8" 
+            onClick={() => onEdit(alarm)}
+          >
+            <Edit2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
@@ -163,10 +175,19 @@ const AlarmListItem: React.FC<{ alarm: Alarm }> = ({ alarm }) => {
 const AlarmList: React.FC = () => {
   const { alarms } = useAlarms();
   const nextAlarm = getNextAlarmTime(alarms);
+  const [editingAlarm, setEditingAlarm] = useState<Alarm | null>(null);
   
-  // Add these two lines to define the missing variables
   const enabledAlarms = alarms.filter(alarm => alarm.enabled);
   const disabledAlarms = alarms.filter(alarm => !alarm.enabled);
+  
+  if (editingAlarm) {
+    return (
+      <AlarmForm 
+        alarmToEdit={editingAlarm}
+        onCancel={() => setEditingAlarm(null)}
+      />
+    );
+  }
   
   if (alarms.length === 0) {
     return (
@@ -194,7 +215,11 @@ const AlarmList: React.FC = () => {
       {enabledAlarms.length > 0 && (
         <div className="space-y-3">
           {enabledAlarms.map(alarm => (
-            <AlarmListItem key={alarm.id} alarm={alarm} />
+            <AlarmListItem 
+              key={alarm.id} 
+              alarm={alarm}
+              onEdit={setEditingAlarm} 
+            />
           ))}
         </div>
       )}
@@ -203,7 +228,11 @@ const AlarmList: React.FC = () => {
         <div className="space-y-1 mt-4">
           <h3 className="text-sm font-medium text-muted-foreground ml-1 mb-2">Disabled Alarms</h3>
           {disabledAlarms.map(alarm => (
-            <AlarmListItem key={alarm.id} alarm={alarm} />
+            <AlarmListItem 
+              key={alarm.id} 
+              alarm={alarm}
+              onEdit={setEditingAlarm}
+            />
           ))}
         </div>
       )}
