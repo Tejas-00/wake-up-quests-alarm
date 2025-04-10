@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAlarms, AlarmDay, MissionType } from "../context/AlarmContext";
 import { Card } from "@/components/ui/card";
@@ -13,7 +12,7 @@ import {
   X, 
   ArrowLeft, 
   Volume2, 
-  Vibration
+  Vibrate
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -221,7 +220,7 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onCancel }) => {
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Vibration className="h-5 w-5" />
+                <Vibrate className="h-5 w-5" />
                 <span>Vibrate</span>
               </div>
               <Switch checked={vibrate} onCheckedChange={setVibrate} />

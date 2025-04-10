@@ -11,18 +11,18 @@ import {
   Volume2, 
   Moon, 
   CloudMoon, 
-  CloudMoonRain,
-  Tree, 
-  WavesSquare
+  CloudRain,
+  Trees, 
+  Waves
 } from "lucide-react";
 import { getSounds, SleepSound, saveCustomSound } from "../utils/alarmStorage";
 import { toast } from "sonner";
 
 const soundIcons: Record<string, React.ReactNode> = {
-  rain: <CloudMoonRain className="h-6 w-6" />,
+  rain: <CloudRain className="h-6 w-6" />,
   white_noise: <Volume2 className="h-6 w-6" />,
-  ocean_waves: <WavesSquare className="h-6 w-6" />,
-  forest: <Tree className="h-6 w-6" />,
+  ocean_waves: <Waves className="h-6 w-6" />,
+  forest: <Trees className="h-6 w-6" />,
   thunderstorm: <CloudMoon className="h-6 w-6" />
 };
 
