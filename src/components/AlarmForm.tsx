@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAlarms, AlarmDay, MissionType, Alarm } from "../context/AlarmContext";
 import { Card } from "@/components/ui/card";
@@ -108,10 +107,7 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onCancel, alarmToEdit }) => {
     };
 
     if (alarmToEdit) {
-      updateAlarm({
-        ...alarmData,
-        id: alarmToEdit.id,
-      });
+      updateAlarm(alarmToEdit.id, alarmData);
       toast.success("Alarm updated successfully");
     } else {
       createAlarm(alarmData);
