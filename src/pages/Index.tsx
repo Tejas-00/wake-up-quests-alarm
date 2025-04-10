@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -171,38 +172,6 @@ const AlarmApp = () => {
             </Tabs>
           </footer>
         </>
-      )}
-
-      {!showAlarmForm && !showMissionDemo && !activeAlarmId && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-white dark:bg-card rounded-lg shadow-lg p-2 z-10">
-          <p className="text-xs text-center mb-2">Demo Missions:</p>
-          <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="text-mission-photo border-mission-photo" 
-              onClick={() => setShowMissionDemo("photo")}
-            >
-              Photo
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="text-mission-math border-mission-math" 
-              onClick={() => setShowMissionDemo("math")}
-            >
-              Math
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="text-mission-puzzle border-mission-puzzle" 
-              onClick={() => setShowMissionDemo("puzzle")}
-            >
-              Puzzle
-            </Button>
-          </div>
-        </div>
       )}
     </div>
   );

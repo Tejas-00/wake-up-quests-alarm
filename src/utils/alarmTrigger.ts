@@ -5,6 +5,7 @@ import { getAlarms } from "./alarmStorage";
 let alarmCheckInterval: number | null = null;
 let activeAlarmId: string | null = null;
 let alarmAudio: HTMLAudioElement | null = null;
+let completedAlarmIds: Record<string, string> = {}; // Store completed alarms as { alarmId: dateString }
 
 interface TriggerOptions {
   onAlarmTriggered: (alarm: Alarm) => void;
@@ -23,6 +24,13 @@ export const shouldTriggerAlarm = (alarm: Alarm): boolean => {
     const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const today = daysOfWeek[now.getDay()];
     
+    // Don't trigger if it's been completed today
+    const dateString = now.toDateString();
+    if (completedAlarmIds[alarm.id] === dateString) {
+      console.log(`Alarm ${alarm.id} already completed today`);
+      return false;
+    }
+    
     return alarm.days[today as keyof typeof alarm.days];
   }
   
@@ -35,6 +43,26 @@ export const startAlarmMonitoring = (options: TriggerOptions): void => {
   
   // Stop any existing monitoring
   stopAlarmMonitoring();
+  
+  // Reset completed alarms at midnight
+  const resetCompletedAlarmsAtMidnight = () => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    const timeToMidnight = tomorrow.getTime() - now.getTime();
+    
+    setTimeout(() => {
+      console.log("Resetting completed alarms at midnight");
+      completedAlarmIds = {};
+      // Set up the next reset
+      resetCompletedAlarmsAtMidnight();
+    }, timeToMidnight);
+  };
+  
+  // Set up initial reset
+  resetCompletedAlarmsAtMidnight();
   
   // Check for alarms every 15 seconds
   alarmCheckInterval = window.setInterval(() => {
@@ -81,6 +109,13 @@ export const dismissAlarm = (): void => {
     alarmAudio.pause();
     alarmAudio = null;
   }
+  
+  // Mark this alarm as completed for today
+  if (activeAlarmId) {
+    completedAlarmIds[activeAlarmId] = new Date().toDateString();
+    console.log(`Marked alarm ${activeAlarmId} as completed for today`);
+  }
+  
   activeAlarmId = null;
 };
 

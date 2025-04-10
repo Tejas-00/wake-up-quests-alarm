@@ -1,10 +1,22 @@
+
 import React, { useState } from "react";
 import { useAlarms, Alarm, MissionType } from "../context/AlarmContext";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Clock, Camera, Calculator, Puzzle, Edit2 } from "lucide-react";
+import { Bell, Clock, Camera, Calculator, Puzzle, Edit2, Trash2 } from "lucide-react";
 import { shouldTriggerAlarm } from "../utils/alarmTrigger";
 import AlarmForm from "./AlarmForm";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 const getMissionIcon = (type: MissionType) => {
   switch (type) {
@@ -130,8 +142,9 @@ const getNextAlarmTime = (alarms: Alarm[]): { alarm: Alarm; timeUntil: string } 
 
 const AlarmListItem: React.FC<{ 
   alarm: Alarm, 
-  onEdit: (alarm: Alarm) => void 
-}> = ({ alarm, onEdit }) => {
+  onEdit: (alarm: Alarm) => void,
+  onDelete: (alarm: Alarm) => void
+}> = ({ alarm, onEdit, onDelete }) => {
   const { toggleAlarm } = useAlarms();
   
   return (
@@ -158,14 +171,24 @@ const AlarmListItem: React.FC<{
             checked={alarm.enabled}
             onCheckedChange={() => toggleAlarm(alarm.id)}
           />
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="p-0 h-8 w-8" 
-            onClick={() => onEdit(alarm)}
-          >
-            <Edit2 className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-1">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="p-0 h-8 w-8" 
+              onClick={() => onEdit(alarm)}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="p-0 h-8 w-8 text-destructive hover:text-destructive/80" 
+              onClick={() => onDelete(alarm)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -173,12 +196,21 @@ const AlarmListItem: React.FC<{
 };
 
 const AlarmList: React.FC = () => {
-  const { alarms } = useAlarms();
+  const { alarms, removeAlarm } = useAlarms();
   const nextAlarm = getNextAlarmTime(alarms);
   const [editingAlarm, setEditingAlarm] = useState<Alarm | null>(null);
+  const [alarmToDelete, setAlarmToDelete] = useState<Alarm | null>(null);
   
   const enabledAlarms = alarms.filter(alarm => alarm.enabled);
   const disabledAlarms = alarms.filter(alarm => !alarm.enabled);
+  
+  const handleDeleteAlarm = () => {
+    if (alarmToDelete) {
+      removeAlarm(alarmToDelete.id);
+      toast.success("Alarm deleted successfully");
+      setAlarmToDelete(null);
+    }
+  };
   
   if (editingAlarm) {
     return (
@@ -218,7 +250,8 @@ const AlarmList: React.FC = () => {
             <AlarmListItem 
               key={alarm.id} 
               alarm={alarm}
-              onEdit={setEditingAlarm} 
+              onEdit={setEditingAlarm}
+              onDelete={setAlarmToDelete}
             />
           ))}
         </div>
@@ -232,10 +265,28 @@ const AlarmList: React.FC = () => {
               key={alarm.id} 
               alarm={alarm}
               onEdit={setEditingAlarm}
+              onDelete={setAlarmToDelete}
             />
           ))}
         </div>
       )}
+      
+      <AlertDialog open={alarmToDelete !== null} onOpenChange={(open) => !open && setAlarmToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Alarm</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this alarm? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAlarm} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
