@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAlarms, AlarmDay, MissionType, Alarm } from "../context/AlarmContext";
 import { Card } from "@/components/ui/card";
@@ -12,13 +13,14 @@ import {
   X, 
   ArrowLeft, 
   Volume2, 
-  Vibrate
+  Vibrate,
+  Shuffle
 } from "lucide-react";
 import { toast } from "sonner";
 
 interface AlarmFormProps {
   onCancel: () => void;
-  alarmToEdit?: Alarm; // Make this prop optional
+  alarmToEdit?: Alarm; 
 }
 
 const AlarmForm: React.FC<AlarmFormProps> = ({ onCancel, alarmToEdit }) => {
@@ -187,7 +189,7 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onCancel, alarmToEdit }) => {
 
         <Card className="p-4">
           <h3 className="font-medium mb-3">Wake-up Mission</h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
             <Button
               type="button"
               variant={missionType === "photo" ? "default" : "outline"}
@@ -214,6 +216,15 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onCancel, alarmToEdit }) => {
             >
               <Puzzle className="h-6 w-6" />
               <span>Puzzle</span>
+            </Button>
+            <Button
+              type="button"
+              variant={missionType === "random" ? "default" : "outline"}
+              className="flex flex-col h-auto py-4 px-2 items-center gap-2"
+              onClick={() => setMissionType("random")}
+            >
+              <Shuffle className="h-6 w-6" />
+              <span>Random</span>
             </Button>
           </div>
         </Card>

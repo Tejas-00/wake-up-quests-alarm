@@ -26,7 +26,17 @@ const AlarmApp = () => {
 
   useEffect(() => {
     if (activeAlarm) {
-      setShowMissionDemo(activeAlarm.missionType);
+      // Determine which mission to show based on the mission type
+      let missionToShow = activeAlarm.missionType;
+      
+      // If the mission type is "random", randomly select a mission
+      if (missionToShow === "random") {
+        const missions = ["photo", "math", "puzzle"];
+        const randomIndex = Math.floor(Math.random() * missions.length);
+        missionToShow = missions[randomIndex] as "photo" | "math" | "puzzle";
+      }
+      
+      setShowMissionDemo(missionToShow as "photo" | "math" | "puzzle");
       
       const audio = new Audio("/sounds/alarm-sound.mp3");
       audio.play().catch(e => console.error("Could not play alarm sound:", e));
@@ -118,7 +128,6 @@ const AlarmApp = () => {
             <Button 
               variant="outline" 
               size="icon" 
-              onClick={() => setShowMissionDemo("photo")}
             >
               <Bell className="h-4 w-4" />
             </Button>
@@ -126,7 +135,7 @@ const AlarmApp = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden flex flex-col">
+      <main className="flex-1 overflow-hidden flex flex-col pb-16">
         {renderContent()}
       </main>
 
@@ -143,26 +152,26 @@ const AlarmApp = () => {
             </Button>
           </div>
           
-          <footer className="border-t border-border bg-background dark:bg-sleep-background">
+          <footer className="fixed bottom-0 left-0 right-0 border-t border-border bg-background dark:bg-sleep-background">
             <Tabs
               value={activeTab}
               onValueChange={(value) => setActiveTab(value as ActiveTab)}
               className="w-full"
             >
               <TabsList className="w-full grid grid-cols-3">
-                <TabsTrigger value="alarms" className="py-6">
+                <TabsTrigger value="alarms" className="py-4">
                   <div className="flex flex-col items-center gap-1">
                     <Bell className="h-5 w-5" />
                     <span className="text-xs">Alarms</span>
                   </div>
                 </TabsTrigger>
-                <TabsTrigger value="sleep" className="py-6">
+                <TabsTrigger value="sleep" className="py-4">
                   <div className="flex flex-col items-center gap-1">
                     <Moon className="h-5 w-5" />
                     <span className="text-xs">Sleep</span>
                   </div>
                 </TabsTrigger>
-                <TabsTrigger value="analytics" className="py-6">
+                <TabsTrigger value="analytics" className="py-4">
                   <div className="flex flex-col items-center gap-1">
                     <BarChart3 className="h-5 w-5" />
                     <span className="text-xs">Insights</span>

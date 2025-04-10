@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import { getAlarms, saveAlarm, deleteAlarm } from "../utils/alarmStorage";
 import { startAlarmMonitoring, dismissAlarm, getActiveAlarmId } from "../utils/alarmTrigger";
 
-export type MissionType = "photo" | "math" | "puzzle";
+export type MissionType = "photo" | "math" | "puzzle" | "random";
 
 export interface AlarmDay {
   monday: boolean;
