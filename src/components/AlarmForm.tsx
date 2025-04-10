@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { useAlarms, AlarmDay, MissionType } from "../context/AlarmContext";
+
+import React, { useState, useEffect } from "react";
+import { useAlarms, AlarmDay, MissionType, Alarm } from "../context/AlarmContext";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,25 +19,28 @@ import { toast } from "sonner";
 
 interface AlarmFormProps {
   onCancel: () => void;
+  alarmToEdit?: Alarm; // Make this prop optional
 }
 
-const AlarmForm: React.FC<AlarmFormProps> = ({ onCancel }) => {
-  const { createAlarm } = useAlarms();
+const AlarmForm: React.FC<AlarmFormProps> = ({ onCancel, alarmToEdit }) => {
+  const { createAlarm, updateAlarm } = useAlarms();
   
-  const [time, setTime] = useState("07:30");
-  const [days, setDays] = useState<AlarmDay>({
-    monday: true,
-    tuesday: true,
-    wednesday: true,
-    thursday: true,
-    friday: true,
-    saturday: false,
-    sunday: false,
-  });
-  const [label, setLabel] = useState("");
-  const [missionType, setMissionType] = useState<MissionType>("photo");
-  const [vibrate, setVibrate] = useState(true);
-  const [soundId, setSoundId] = useState("default");
+  const [time, setTime] = useState(alarmToEdit ? alarmToEdit.time : "07:30");
+  const [days, setDays] = useState<AlarmDay>(
+    alarmToEdit ? alarmToEdit.days : {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: false,
+      sunday: false,
+    }
+  );
+  const [label, setLabel] = useState(alarmToEdit ? alarmToEdit.label || "" : "");
+  const [missionType, setMissionType] = useState<MissionType>(alarmToEdit ? alarmToEdit.missionType : "photo");
+  const [vibrate, setVibrate] = useState(alarmToEdit ? alarmToEdit.vibrate : true);
+  const [soundId, setSoundId] = useState(alarmToEdit ? alarmToEdit.soundId : "default");
 
   const handleToggleDay = (day: keyof AlarmDay) => {
     setDays({ ...days, [day]: !days[day] });
@@ -93,17 +97,27 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onCancel }) => {
       return;
     }
 
-    createAlarm({
+    const alarmData = {
       time,
       days,
       label,
       missionType,
       vibrate,
       soundId,
-      enabled: true,
-    });
+      enabled: alarmToEdit ? alarmToEdit.enabled : true,
+    };
+
+    if (alarmToEdit) {
+      updateAlarm({
+        ...alarmData,
+        id: alarmToEdit.id,
+      });
+      toast.success("Alarm updated successfully");
+    } else {
+      createAlarm(alarmData);
+      toast.success("Alarm created successfully");
+    }
     
-    toast.success("Alarm created successfully");
     onCancel();
   };
 
@@ -113,7 +127,7 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onCancel }) => {
         <Button variant="ghost" size="icon" onClick={onCancel}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h2 className="text-lg font-medium">New Alarm</h2>
+        <h2 className="text-lg font-medium">{alarmToEdit ? "Edit Alarm" : "New Alarm"}</h2>
         <Button variant="ghost" size="icon" onClick={onCancel}>
           <X className="h-5 w-5" />
         </Button>
@@ -239,7 +253,7 @@ const AlarmForm: React.FC<AlarmFormProps> = ({ onCancel }) => {
         </div>
 
         <Button type="submit" className="w-full">
-          Save Alarm
+          {alarmToEdit ? "Update Alarm" : "Save Alarm"}
         </Button>
       </form>
     </div>
