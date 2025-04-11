@@ -2,7 +2,7 @@
 import { Alarm } from "../context/AlarmContext";
 import { getAlarms } from "./alarmStorage";
 
-let alarmCheckInterval: number | null = null;
+let alarmCheckInterval: ReturnType<typeof setInterval> | null = null;
 let activeAlarmId: string | null = null;
 let alarmAudio: HTMLAudioElement | null = null;
 let completedAlarmIds: Record<string, string> = {}; // Store completed alarms as { alarmId: dateString }
