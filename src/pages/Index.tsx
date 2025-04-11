@@ -24,30 +24,75 @@ const AlarmApp = () => {
 
   const activeAlarm = alarms.find(alarm => alarm.id === activeAlarmId);
 
+  // Setup audio context as early as possible for mobile
+  useEffect(() => {
+    // Initialize audio context on component mount - important for mobile
+    const initializeAudio = () => {
+      // Create and play a silent audio to enable audio context on mobile
+      const silentSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1TSS0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAASAAAeMwAUFBQUFCIiIiIiIjAwMDAwPz8/Pz8/TExMTExZWVlZWVlnZ2dnZ3V1dXV1dYODg4ODkZGRkZGRn5+fn5+frKysrKy6urq6urq/v7+/v7/MzMzMzMzY2NjY2Nra2tra2uTk5OTk8vLy8vLy//////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAXwAAAAAAAAHjOZTf9/AAAAAAAAAAAAAAAAAAAAAP/7kGQAAANUMEoFPeACNQV40KEYABEY41g5vAAA9RjpZxRwAImU+W8eshaFpAQgALAAYALATx/nYDYCMJ0HITQYYA7AH4c7MoGsnCMU5pnW+OQnBcDrQ9Qy7y8vLy8vL9h555519l5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5f/7kmRAP/0MkLJBQngAi9GePCpGAAZTM8YagAAKFGY6UxMAAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAf/7kkQAP/AAAf4AAAAgAAA/wAAABAAAB/gAAACAAAD/AAAABAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBA");
+      silentSound.volume = 0.01; // Almost silent
+      silentSound.play().then(() => {
+        silentSound.pause();
+        silentSound.remove();
+        console.log("Audio context initialized successfully");
+      }).catch(e => {
+        console.log("Failed to initialize audio context:", e);
+      });
+    };
+
+    // Initialize on first user interaction
+    const handleUserInteraction = () => {
+      initializeAudio();
+      // Remove the event listeners after first interaction
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('click', handleUserInteraction);
+    };
+
+    // Add event listeners for user interaction
+    document.addEventListener('touchstart', handleUserInteraction, { once: true });
+    document.addEventListener('click', handleUserInteraction, { once: true });
+
+    // Also try to initialize immediately (might work on desktop)
+    initializeAudio();
+
+    // Check for active alarm on component mount
+    if (activeAlarm) {
+      handleAlarmActivation(activeAlarm);
+    }
+
+    return () => {
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('click', handleUserInteraction);
+    };
+  }, []);
+
   useEffect(() => {
     if (activeAlarm) {
-      // Determine which mission to show based on the mission type
-      let missionToShow = activeAlarm.missionType;
-      
-      // If the mission type is "random", randomly select a mission
-      if (missionToShow === "random") {
-        const missions = ["photo", "math", "puzzle"];
-        const randomIndex = Math.floor(Math.random() * missions.length);
-        missionToShow = missions[randomIndex] as "photo" | "math" | "puzzle";
-      }
-      
-      setShowMissionDemo(missionToShow as "photo" | "math" | "puzzle");
-      
-      const audio = new Audio("/sounds/alarm-sound.mp3");
-      audio.play().catch(e => console.error("Could not play alarm sound:", e));
-      
-      toast({
-        title: "Alarm Going Off!",
-        description: activeAlarm.label || "Complete the mission to dismiss the alarm",
-        variant: "destructive",
-      });
+      handleAlarmActivation(activeAlarm);
     }
-  }, [activeAlarmId, activeAlarm, toast]);
+  }, [activeAlarmId, activeAlarm]);
+
+  const handleAlarmActivation = (alarm: typeof activeAlarm) => {
+    if (!alarm) return;
+    
+    // Determine which mission to show based on the mission type
+    let missionToShow = alarm.missionType;
+    
+    // If the mission type is "random", randomly select a mission
+    if (missionToShow === "random") {
+      const missions = ["photo", "math", "puzzle"];
+      const randomIndex = Math.floor(Math.random() * missions.length);
+      missionToShow = missions[randomIndex] as "photo" | "math" | "puzzle";
+    }
+    
+    setShowMissionDemo(missionToShow as "photo" | "math" | "puzzle");
+    
+    toast({
+      title: "Alarm Going Off!",
+      description: alarm.label || "Complete the mission to dismiss the alarm",
+      variant: "destructive",
+    });
+  };
 
   const handleComplete = () => {
     if (activeAlarmId) {
@@ -118,7 +163,7 @@ const AlarmApp = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background dark:bg-sleep-background">
+    <div className="flex flex-col h-[100vh] bg-background dark:bg-sleep-background">
       <header className="p-4 border-b border-border">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-alarm-primary">
@@ -135,7 +180,7 @@ const AlarmApp = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden flex flex-col pb-16">
+      <main className="flex-1 overflow-hidden flex flex-col">
         {renderContent()}
       </main>
 

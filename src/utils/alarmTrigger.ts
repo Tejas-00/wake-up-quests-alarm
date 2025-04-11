@@ -1,3 +1,4 @@
+
 import { Alarm } from "../context/AlarmContext";
 import { getAlarms } from "./alarmStorage";
 
@@ -63,7 +64,7 @@ export const startAlarmMonitoring = (options: TriggerOptions): void => {
   // Set up initial reset
   resetCompletedAlarmsAtMidnight();
   
-  // Check for alarms every 15 seconds
+  // Check for alarms every minute
   alarmCheckInterval = window.setInterval(() => {
     if (activeAlarmId) return; // Don't check if an alarm is already active
     
@@ -81,22 +82,88 @@ export const startAlarmMonitoring = (options: TriggerOptions): void => {
         break;
       }
     }
-  }, 15000); // Check every 15 seconds
+  }, 60000); // Check every minute
+  
+  // Also check immediately on startup
+  setTimeout(() => {
+    const alarms = getAlarms();
+    const now = new Date();
+    console.log(`Initial alarm check at ${now.toLocaleTimeString()}...`);
+    
+    for (const alarm of alarms) {
+      if (shouldTriggerAlarm(alarm)) {
+        console.log(`Alarm triggered on initial check: ${alarm.label || alarm.time}`);
+        triggerAlarm(alarm, options.onAlarmTriggered);
+        break;
+      }
+    }
+  }, 1000);
+};
+
+// Preload audio element to avoid playback issues on mobile
+const preloadAlarmSound = (): HTMLAudioElement => {
+  const audio = new Audio("/sounds/alarm-sound.mp3");
+  // Enable auto-play on mobile by adding user interaction event listeners
+  document.addEventListener('touchstart', () => {
+    // Create and play a silent audio to enable audio context
+    const silentAudio = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAASAAAeMwAUFBQUFCIiIiIiIjAwMDAwPz8/Pz8/TExMTExZWVlZWVlnZ2dnZ3V1dXV1dYODg4ODkZGRkZGRn5+fn5+frKysrKy6urq6urq/v7+/v7/MzMzMzMzY2NjY2Nra2tra2uTk5OTk8vLy8vLy//////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAXwAAAAAAAAHjOZTf9/AAAAAAAAAAAAAAAAAAAAAP/7kGQAAANUMEoFPeACNQV40KEYABEY41g5vAAA9RjpZxRwAImU+W8eshaFpAQgALAAYALATx/nYDYCMJ0HITQYYA7AH4c7MoGsnCMU5pnW+OQnBcDrQ9Qy7y8vLy8vL9h555519l5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5f/7kmRAP/0MkLJBQngAi9GePCpGAAZTM8YagAAKFGY6UxMAAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAf/7kkQAP/AAAf4AAAAgAAA/wAAABAAAB/gAAACAAAD/AAAABAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBAEAQBA");
+    silentAudio.play().then(() => {
+      silentAudio.pause();
+      silentAudio.remove();
+    }).catch(e => console.log("Silent audio play failed:", e));
+  }, { once: true });
+  
+  return audio;
 };
 
 // Trigger a specific alarm
 export const triggerAlarm = (alarm: Alarm, callback: (alarm: Alarm) => void): void => {
   activeAlarmId = alarm.id;
   
-  // Create audio element for alarm sound
-  alarmAudio = new Audio("/sounds/alarm-sound.mp3"); // Default sound
-  alarmAudio.loop = true;
-  alarmAudio.volume = 0.7;
+  // Create audio element for alarm sound with improved mobile handling
+  if (alarmAudio) {
+    alarmAudio.pause();
+    alarmAudio = null;
+  }
   
-  // Play the alarm sound
-  alarmAudio.play().catch(error => {
-    console.error("Error playing alarm sound:", error);
-  });
+  alarmAudio = preloadAlarmSound();
+  alarmAudio.loop = true;
+  alarmAudio.volume = 1.0; // Full volume for mobile
+  
+  // Ensure audio plays even if the app is in background
+  try {
+    // Play the alarm sound with retry mechanism
+    const playWithRetry = (retries = 3) => {
+      alarmAudio!.play()
+        .then(() => {
+          console.log("Alarm sound playing successfully");
+        })
+        .catch(error => {
+          console.error("Error playing alarm sound:", error);
+          
+          // Try again with user interaction if available
+          if (retries > 0) {
+            console.log(`Retrying playback, ${retries} attempts left`);
+            setTimeout(() => playWithRetry(retries - 1), 1000);
+          }
+        });
+    };
+    
+    playWithRetry();
+    
+    // Use device vibration if available
+    if (navigator.vibrate) {
+      // Vibrate pattern: 500ms vibrate, 200ms pause, repeat
+      const vibrateInterval = setInterval(() => {
+        navigator.vibrate([500, 200, 500]);
+      }, 1500);
+      
+      // Store the interval ID in window for cleanup
+      window.alarmVibrateInterval = vibrateInterval;
+    }
+  } catch (e) {
+    console.error("Critical error triggering alarm:", e);
+  }
   
   // Notify the callback
   callback(alarm);
@@ -106,7 +173,15 @@ export const triggerAlarm = (alarm: Alarm, callback: (alarm: Alarm) => void): vo
 export const dismissAlarm = (): void => {
   if (alarmAudio) {
     alarmAudio.pause();
+    alarmAudio.currentTime = 0;
     alarmAudio = null;
+  }
+  
+  // Stop vibration if active
+  if (navigator.vibrate && window.alarmVibrateInterval) {
+    navigator.vibrate(0); // Stop vibration
+    clearInterval(window.alarmVibrateInterval);
+    window.alarmVibrateInterval = null;
   }
   
   // Mark this alarm as completed for today
@@ -130,6 +205,13 @@ export const stopAlarmMonitoring = (): void => {
     alarmAudio = null;
   }
   
+  // Stop vibration if active
+  if (navigator.vibrate && window.alarmVibrateInterval) {
+    navigator.vibrate(0);
+    clearInterval(window.alarmVibrateInterval);
+    window.alarmVibrateInterval = null;
+  }
+  
   activeAlarmId = null;
 };
 
@@ -137,3 +219,13 @@ export const stopAlarmMonitoring = (): void => {
 export const getActiveAlarmId = (): string | null => {
   return activeAlarmId;
 };
+
+// Add to window object for TypeScript
+declare global {
+  interface Window {
+    alarmVibrateInterval: number | null;
+  }
+}
+
+// Initialize window.alarmVibrateInterval
+window.alarmVibrateInterval = null;
