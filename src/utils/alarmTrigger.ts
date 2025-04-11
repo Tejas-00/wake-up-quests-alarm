@@ -53,7 +53,7 @@ export const startAlarmMonitoring = (options: TriggerOptions): void => {
     
     const timeToMidnight = tomorrow.getTime() - now.getTime();
     
-    // Simply call setTimeout without storing the ID in a variable
+    // Fix: Use ReturnType<typeof setTimeout> to match TypeScript's expected type
     setTimeout(() => {
       console.log("Resetting completed alarms at midnight");
       completedAlarmIds = {};
