@@ -86,7 +86,7 @@ export const startAlarmMonitoring = (options: TriggerOptions): void => {
   }, 60000); // Check every minute
   
   // Also check immediately on startup
-  setTimeout(() => {
+  window.setTimeout(() => {
     const alarms = getAlarms();
     const now = new Date();
     console.log(`Initial alarm check at ${now.toLocaleTimeString()}...`);
