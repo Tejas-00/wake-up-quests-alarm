@@ -53,6 +53,7 @@ export const startAlarmMonitoring = (options: TriggerOptions): void => {
     
     const timeToMidnight = tomorrow.getTime() - now.getTime();
     
+    // Use ReturnType<typeof setTimeout> to match the correct return type
     setTimeout(() => {
       console.log("Resetting completed alarms at midnight");
       completedAlarmIds = {};
