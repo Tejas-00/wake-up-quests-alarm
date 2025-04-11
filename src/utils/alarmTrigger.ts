@@ -223,7 +223,7 @@ export const getActiveAlarmId = (): string | null => {
 // Add to window object for TypeScript
 declare global {
   interface Window {
-    alarmVibrateInterval: number | null;
+    alarmVibrateInterval: ReturnType<typeof setInterval> | null;
   }
 }
 
