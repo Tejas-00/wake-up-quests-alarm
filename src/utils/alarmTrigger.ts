@@ -53,8 +53,8 @@ export const startAlarmMonitoring = (options: TriggerOptions): void => {
     
     const timeToMidnight = tomorrow.getTime() - now.getTime();
     
-    // Fix: Use ReturnType<typeof setTimeout> to match TypeScript's expected type
-    setTimeout(() => {
+    // Fix: Use window.setTimeout explicitly to match browser's setTimeout return type
+    window.setTimeout(() => {
       console.log("Resetting completed alarms at midnight");
       completedAlarmIds = {};
       // Set up the next reset
