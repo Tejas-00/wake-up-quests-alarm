@@ -53,7 +53,7 @@ export const startAlarmMonitoring = (options: TriggerOptions): void => {
     
     const timeToMidnight = tomorrow.getTime() - now.getTime();
     
-    // Don't store the timeout ID, just call setTimeout
+    // Simply call setTimeout without storing the ID in a variable
     setTimeout(() => {
       console.log("Resetting completed alarms at midnight");
       completedAlarmIds = {};
