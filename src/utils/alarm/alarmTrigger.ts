@@ -9,7 +9,8 @@ export const triggerAlarm = (alarm: Alarm, callback: (alarm: Alarm) => void): vo
   setActiveAlarmId(alarm.id);
   
   // Start audio and vibration
-  startAlarmSound();
+  const soundPath = getSoundPath(alarm.soundId);
+  startAlarmSound(soundPath);
   
   if (alarm.vibrate) {
     startVibration();
@@ -17,6 +18,22 @@ export const triggerAlarm = (alarm: Alarm, callback: (alarm: Alarm) => void): vo
   
   // Notify the callback
   callback(alarm);
+};
+
+// Helper function to get sound path based on ID
+const getSoundPath = (soundId: string): string => {
+  // Map sound IDs to their file paths
+  // This could be expanded with more sounds in the future
+  switch (soundId) {
+    case 'default':
+      return '/sounds/alarm.mp3';
+    case 'gentle':
+      return '/sounds/gentle-alarm.mp3';
+    case 'loud':
+      return '/sounds/loud-alarm.mp3';
+    default:
+      return '/sounds/alarm.mp3'; // Default fallback
+  }
 };
 
 // Dismiss the currently active alarm

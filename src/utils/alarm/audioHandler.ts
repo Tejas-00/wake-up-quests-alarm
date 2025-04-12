@@ -2,10 +2,12 @@
 // Audio handling for alarms
 
 let alarmAudio: HTMLAudioElement | null = null;
+const DEFAULT_ALARM_SOUND = "/sounds/alarm.mp3"; // Default fallback sound
 
 // Preload audio element to avoid playback issues on mobile
-export const preloadAlarmSound = (): HTMLAudioElement => {
-  const audio = new Audio("/sounds/alarm-sound.mp3");
+export const preloadAlarmSound = (soundPath?: string): HTMLAudioElement => {
+  const soundUrl = soundPath || DEFAULT_ALARM_SOUND;
+  const audio = new Audio(soundUrl);
   
   // Enable auto-play on mobile by adding user interaction event listeners
   document.addEventListener('touchstart', () => {
@@ -17,17 +19,21 @@ export const preloadAlarmSound = (): HTMLAudioElement => {
     }).catch(e => console.log("Silent audio play failed:", e));
   }, { once: true });
   
+  // Improve mobile and web compatibility
+  audio.setAttribute('playsinline', ''); 
+  audio.setAttribute('webkit-playsinline', '');
+  
   return audio;
 };
 
 // Start playing alarm sound
-export const startAlarmSound = (): void => {
+export const startAlarmSound = (soundPath?: string): void => {
   if (alarmAudio) {
     alarmAudio.pause();
     alarmAudio = null;
   }
   
-  alarmAudio = preloadAlarmSound();
+  alarmAudio = preloadAlarmSound(soundPath);
   alarmAudio.loop = true;
   alarmAudio.volume = 1.0; // Full volume for mobile
   
