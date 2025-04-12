@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import { useAlarms, Alarm, MissionType } from "../context/AlarmContext";
 import { Switch } from "@/components/ui/switch";
 import { Bell, Clock, Camera, Calculator, Puzzle, Edit2, Trash2 } from "lucide-react";
-import { shouldTriggerAlarm } from "../utils/alarmTrigger";
+import { shouldTriggerAlarm } from "../utils/alarm";
 import AlarmForm from "./AlarmForm";
 import { Button } from "@/components/ui/button";
 import {

@@ -1,6 +1,10 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { getAlarms, saveAlarm, deleteAlarm } from "../utils/alarmStorage";
-import { startAlarmMonitoring, dismissAlarm, getActiveAlarmId } from "../utils/alarmTrigger";
+import { 
+  startAlarmMonitoring, 
+  dismissAlarm, 
+  getActiveAlarmId 
+} from "../utils/alarm";
 
 export type MissionType = "photo" | "math" | "puzzle" | "random";
 
