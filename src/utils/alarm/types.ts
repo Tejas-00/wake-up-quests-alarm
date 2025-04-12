@@ -25,6 +25,8 @@ export interface TriggerOptions {
 // Add to window object for TypeScript
 declare global {
   interface Window {
-    alarmVibrateInterval: ReturnType<typeof setInterval> | null;
+    alarmVibrateInterval: number | null;
+    alarmResetTimeout: number | null;
+    alarmCheckInterval: number | null;
   }
 }

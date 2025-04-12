@@ -8,6 +8,9 @@ export const startVibration = (): void => {
     return;
   }
   
+  // Stop any existing vibration first
+  stopVibration();
+  
   // Vibrate pattern: 500ms vibrate, 200ms pause, repeat
   const vibrateInterval = window.setInterval(() => {
     navigator.vibrate([500, 200, 500]);

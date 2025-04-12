@@ -1,8 +1,12 @@
 
 // State management for alarms
 let activeAlarmId: string | null = null;
-let alarmCheckInterval: ReturnType<typeof setInterval> | null = null;
 let completedAlarmIds: Record<string, string> = {}; // Store completed alarms as { alarmId: dateString }
+
+// Initialize window globals
+window.alarmVibrateInterval = null;
+window.alarmCheckInterval = null;
+window.alarmResetTimeout = null;
 
 // Get the currently active alarm ID (if any)
 export const getActiveAlarmId = (): string | null => {
@@ -34,14 +38,6 @@ export const resetCompletedAlarms = (): void => {
 };
 
 // Set alarm check interval
-export const setAlarmCheckInterval = (interval: ReturnType<typeof setInterval> | null): void => {
-  alarmCheckInterval = interval;
+export const setAlarmCheckInterval = (interval: number | null): void => {
+  window.alarmCheckInterval = interval;
 };
-
-// Get alarm check interval
-export const getAlarmCheckInterval = (): ReturnType<typeof setInterval> | null => {
-  return alarmCheckInterval;
-};
-
-// Initialize window.alarmVibrateInterval
-window.alarmVibrateInterval = null;

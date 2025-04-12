@@ -38,7 +38,13 @@ export const scheduleResetAtMidnight = (): void => {
   
   const timeToMidnight = tomorrow.getTime() - now.getTime();
   
-  window.setTimeout(() => {
+  // Clear any existing timeout
+  if (window.alarmResetTimeout) {
+    window.clearTimeout(window.alarmResetTimeout);
+  }
+  
+  // Use window.setTimeout and store the ID properly
+  window.alarmResetTimeout = window.setTimeout(() => {
     console.log("Resetting completed alarms at midnight");
     resetCompletedAlarms();
     // Set up the next reset
@@ -74,6 +80,7 @@ export const startAlarmMonitoring = (options: TriggerOptions): void => {
     }
   }, 60000); // Check every minute
   
+  // Set the interval in the state manager but check the return type directly
   setAlarmCheckInterval(interval);
   
   // Also check immediately on startup
@@ -94,8 +101,15 @@ export const startAlarmMonitoring = (options: TriggerOptions): void => {
 
 // Stop monitoring alarms
 export const stopAlarmMonitoring = (): void => {
-  const alarmCheckInterval = setAlarmCheckInterval(null);
-  if (alarmCheckInterval) {
+  // Get the interval ID and clear it if it exists
+  const alarmCheckInterval = getAlarmCheckInterval();
+  if (alarmCheckInterval !== null) {
     window.clearInterval(alarmCheckInterval);
+    setAlarmCheckInterval(null);
   }
+};
+
+// Helper function to get the alarm check interval
+const getAlarmCheckInterval = (): number | null => {
+  return window.alarmCheckInterval;
 };
