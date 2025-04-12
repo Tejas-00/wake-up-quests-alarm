@@ -26,13 +26,13 @@ const getSoundPath = (soundId: string): string => {
   // This could be expanded with more sounds in the future
   switch (soundId) {
     case 'default':
-      return '/sounds/alarm.mp3';
+      return '/sounds/sound.mp3'; // Updated to use manually added sound.mp3
     case 'gentle':
-      return '/sounds/gentle-alarm.mp3';
+      return '/sounds/sound.mp3'; // Fallback to the manually added sound
     case 'loud':
-      return '/sounds/loud-alarm.mp3';
+      return '/sounds/sound.mp3'; // Fallback to the manually added sound
     default:
-      return '/sounds/alarm.mp3'; // Default fallback
+      return '/sounds/sound.mp3'; // Default fallback to manually added sound
   }
 };
 

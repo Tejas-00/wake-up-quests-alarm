@@ -2,7 +2,7 @@
 // Audio handling for alarms
 
 let alarmAudio: HTMLAudioElement | null = null;
-const DEFAULT_ALARM_SOUND = "/sounds/alarm.mp3"; // Default fallback sound
+const DEFAULT_ALARM_SOUND = "/sounds/sound.mp3"; // Updated to use manually added sound.mp3
 
 // Preload audio element to avoid playback issues on mobile
 export const preloadAlarmSound = (soundPath?: string): HTMLAudioElement => {
